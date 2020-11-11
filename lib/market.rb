@@ -5,7 +5,10 @@ class Market
   def initialize(name)
     @name = name
     @vendors = []
-    @date = Date.today
+  end
+
+  def date
+    date = Date.today.strftime("%d/%m/%Y")
   end
 
   def add_vendor(vendor)
@@ -19,55 +22,45 @@ class Market
   end
 
   def vendors_that_sell(item)
-    result = []
-    @vendors.each do |vendor|
-      if vendor.inventory.include?(item)
-      result << vendor
-      end
+    @vendors.find_all do |vendor|
+      vendor if vendor.inventory.include?(item)
     end
-    result
   end
 
   def sorted_item_list
-    sorted = []
-    @vendors.each do |vendor|
-    vendor.inventory.keys.each do |item|
-      sorted << item.name
+    @vendors.flat_map do |vendor|
+    vendor.inventory.keys.map do |item|
+      item.name
       end
-    end
-    sorted.sort.uniq
+    end.uniq
   end
 
   def total_items(item_provided)
     total = 0
     @vendors.each do |vendor|
       vendor.inventory.keys.each do |item|
-        if item_provided == item
-          total += vendor.inventory[item_provided]
-        else
-          vendor.inventory[item_provided]
+        total += vendor.inventory[item_provided] if item_provided == item
       end
-    end
     end
     total
   end
 
   def total_inventory
-    final_result = {}
+    total_inventory_hash = {}
     @vendors.each do |vendor|
       vendor.inventory.keys.each do |item|
-        second_hash = {}
-        second_hash[:quantity] = total_items(item)
-        second_hash[:vendors] = vendors_that_sell(item)
-      final_result[item] = second_hash
+        item_hash = {}
+        item_hash[:quantity] = total_items(item)
+        item_hash[:vendors] = vendors_that_sell(item)
+        total_inventory_hash[item] = item_hash
       end
     end
-    final_result
+    total_inventory_hash
   end
 
   def overstocked_items
     overstocked = []
-    @vendors.each do |vendor|
+    @vendors.find_all do |vendor|
       vendor.inventory.keys.each do |item|
         if vendors_that_sell(item).count >= 2 && total_items(item) >= 50
           overstocked << item
@@ -78,8 +71,8 @@ class Market
   end
 
   def is_enough?(item, quantity_provided)
-  quantity = total_items(item)
-  quantity >= quantity_provided
+    quantity = total_items(item)
+    quantity >= quantity_provided
   end
 
   def sell(item, quantity_provided)

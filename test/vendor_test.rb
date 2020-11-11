@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'minitest/pride'
+require './test/test_helper'
 require './lib/vendor'
 require './lib/item'
 
@@ -23,16 +22,23 @@ class VendorTest < Minitest::Test
 
   def test_inventory
     expected = {}
+
     assert_equal expected, @vendor.inventory
     assert_equal 0,@vendor.check_stock(@item1)
+
     @vendor.stock(@item1, 30)
     expected = {@item1 => 30}
+
     assert_equal expected, @vendor.inventory
     assert_equal 30, @vendor.check_stock(@item1)
+
     @vendor.stock(@item1, 25)
+
     assert_equal 55, @vendor.check_stock(@item1)
+
     @vendor.stock(@item2, 12)
     expected = {@item1 => 55, @item2 => 12}
+
     assert_equal expected, @vendor.inventory
   end
 
@@ -42,6 +48,7 @@ class VendorTest < Minitest::Test
     @vendor2.stock(@item4, 50)
     @vendor2.stock(@item3, 25)
     @vendor3.stock(@item1, 65)
+
     assert_equal 29.75, @vendor1.potential_revenue
     assert_equal 345.00, @vendor2.potential_revenue
     assert_equal 48.75, @vendor3.potential_revenue

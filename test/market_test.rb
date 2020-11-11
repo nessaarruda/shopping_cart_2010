@@ -1,8 +1,7 @@
-require 'minitest/autorun'
-require 'minitest/pride'
-require './lib/market'
+require './test/test_helper'
 require './lib/item'
 require './lib/vendor'
+require './lib/market'
 require 'mocha/minitest'
 require 'date'
 
@@ -23,11 +22,16 @@ class MarketTest < Minitest::Test
   def test_it_exists_and_has_attributes
     assert_instance_of Market, @market
     assert_equal "South Pearl Street Farmers Market", @market.name
-    Date.stubs(:date).returns("24/02/2020")
+  end
+
+  def test_it_has_a_date
+    Date.stubs(:today).returns(Date.parse("20200224"))
+    assert_equal "24/02/2020", @market.date
   end
 
   def test_it_can_add_vendors
     assert_equal [], @market.vendors
+
     @vendor1.stock(@item1, 35)
     @vendor1.stock(@item2, 7)
     @vendor2.stock(@item4, 50)
@@ -36,7 +40,8 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
-    assert_equal [@vendor1, @vendor2, @vendor3], @market.vendors
+    expected = [@vendor1, @vendor2, @vendor3]
+    assert_equal expected, @market.vendors
   end
 
   def test_it_can_list_vendors_names
@@ -48,7 +53,9 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
-    assert_equal ["Rocky Mountain Fresh", "Ba-Nom-a-Nom", "Palisade Peach Shack"],@market.vendor_names
+    expected = ["Rocky Mountain Fresh", "Ba-Nom-a-Nom", "Palisade Peach Shack"]
+
+    assert_equal expected, @market.vendor_names
   end
 
   def test_vendors_that_sell
@@ -60,8 +67,12 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
-    assert_equal [@vendor1, @vendor3], @market.vendors_that_sell(@item1)
-    assert_equal [@vendor2], @market.vendors_that_sell(@item4)
+    expected = [@vendor1, @vendor3]
+
+    assert_equal expected, @market.vendors_that_sell(@item1)
+    expected = [@vendor2]
+
+    assert_equal expected, @market.vendors_that_sell(@item4)
   end
 
   def test_sorted_item_list
@@ -73,7 +84,9 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
-    assert_equal ["Banana Nice Cream", "Peach", "Peach-Raspberry Nice Cream", "Tomato"], @market.sorted_item_list
+    expected = ["Peach", "Tomato", "Banana Nice Cream", "Peach-Raspberry Nice Cream"]
+
+    assert_equal expected, @market.sorted_item_list
   end
 
   def test_total_items
@@ -86,6 +99,7 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
+
     assert_equal 100, @market.total_items(@item1)
   end
 
@@ -117,6 +131,7 @@ class MarketTest < Minitest::Test
            vendors: [@vendor2, @vendor3]
          },
        }
+
     assert_equal expected, @market.total_inventory
   end
 
@@ -130,7 +145,9 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
-    assert_equal [@item1], @market.overstocked_items
+    expected = [@item1]
+
+    assert_equal expected, @market.overstocked_items
   end
 
   def test_enough_items
@@ -143,6 +160,7 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor1)
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
+
     assert_equal true, @market.is_enough?(@item1, 100)
   end
 
@@ -156,11 +174,12 @@ class MarketTest < Minitest::Test
     @market.add_vendor(@vendor2)
     @market.add_vendor(@vendor3)
     @market.sell(@item1, 200)
+
     assert_equal false, @market.sell(@item5, 1)
     assert_equal true, @market.sell(@item4, 5)
     assert_equal 45, @vendor2.check_stock(@item4)
     assert_equal true, @market.sell(@item1, 40)
     assert_equal 0, @vendor1.check_stock(@item1)
-    # assert_equal 60, @vendor3.check_stock(@item1)
+    assert_equal 60, @vendor3.check_stock(@item1)
   end
 end
