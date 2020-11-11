@@ -8,7 +8,7 @@ class Market
   end
 
   def date
-    Date.today.strftime("%d/%m/%Y")
+    date = Date.today.strftime("%d/%m/%Y")
   end
 
   def add_vendor(vendor)
